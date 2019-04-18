@@ -17,6 +17,8 @@
         formatResult: formatResult
     };
 
+    var mentionRange = null;
+
     $.extend(true, $.trumbowyg, {
         langs: {
             en: {
@@ -60,24 +62,29 @@
 
                         t.$ed.keypress(function(e) {
                             var key = String.fromCharCode(e.which),
-                                text = t.$ed.text(),
-                                last = text.substr(-1),
-                                visible = $dropdown.is(':visible'),
-                                show = visible;
-                            console.error(t.range)
+                                range = t.doc.getSelection().getRangeAt(0),
+                                start = range.startOffset,
+                                visible = $dropdown.is(':visible');
 
-                            if (key === '@'/* && (!last || last.match(/\s/))*/) {
-                                show = true;
+                            if (key === '@') {
+                                var text = range + '';
+                                if (start === 0 || text.substr(start - 1, 1).match(/\s/)) {
+                                    mentionRange = range;
+                                }
                             }
-                            else if (!/[a-z\d]/i.test(key)) {
-                                show = false;
+                            else if (mentionRange) {
+                                if (!/[a-z\d]/i.test(key)) {
+                                    mentionRange = null;
+                                }
+                                else {
+                                    mentionRange.setEnd(range.startContainer, start + 1);
+                                }
                             }
 
-                            if (!visible && show) {
-                                $dropdown.show();
-                            }
-                            else if (visible && !show) {
-                                $dropdown.hide();
+                            console.error(mentionRange, visible)
+
+                            if (!visible && mentionRange || visible && !mentionRange) {
+                                t.dropdown('ar_mention');
                             }
                         });
 
