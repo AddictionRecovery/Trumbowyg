@@ -52,6 +52,36 @@
                     };
 
                     trumbowyg.addBtnDef('ar_mention', btnDef);
+
+                    trumbowyg.$c.on('tbwinit', function () {
+                        var t = trumbowyg,
+                            prefix = t.o.prefix,
+                            $dropdown = $('[data-' + prefix + 'dropdown=ar_mention]', t.$box);
+
+                        t.$ed.keypress(function(e) {
+                            var key = String.fromCharCode(e.which),
+                                text = t.$ed.text(),
+                                last = text.substr(-1),
+                                visible = $dropdown.is(':visible'),
+                                show = visible;
+                            console.error(t.range)
+
+                            if (key === '@'/* && (!last || last.match(/\s/))*/) {
+                                show = true;
+                            }
+                            else if (!/[a-z\d]/i.test(key)) {
+                                show = false;
+                            }
+
+                            if (!visible && show) {
+                                $dropdown.show();
+                            }
+                            else if (visible && !show) {
+                                $dropdown.hide();
+                            }
+                        });
+
+                    });
                 }
             }
         }
@@ -76,6 +106,7 @@
                         hasIcon: false,
                         text: trumbowyg.o.plugins.ar_mention.formatDropdownItem(item),
                         fn: function () {
+                            console.error(trumbowyg)
                             trumbowyg.execCmd('insertHTML', trumbowyg.o.plugins.ar_mention.formatResult(item));
 
                             return true;
